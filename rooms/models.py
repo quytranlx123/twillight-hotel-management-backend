@@ -1,4 +1,6 @@
 from django.db import models
+
+
 # rooms/models.py
 class RoomType(models.Model):
     type_name = models.CharField(max_length=50)

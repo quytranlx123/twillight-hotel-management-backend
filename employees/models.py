@@ -1,12 +1,13 @@
-# customers/models.py
 import hashlib
 from django.db import models
 from accounts.models import CustomUser
 
 
-class Customer(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='customer_profile')
-    identity_card_number = models.CharField(max_length=64, unique=True, editable=False)  # Tăng độ dài để chứa giá trị băm
+class Employee(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='employee_profile')
+    role = models.CharField(max_length=100, blank=True, null=True)
+    hire_date = models.DateField(null=True, blank=True)
+    identity_card_number = models.CharField(max_length=64, unique=True, editable=False)#Tăng độ dài để chứa giá trị băm
 
     def set_identity_card_number(self, identity_card_number):
         # Băm CCCD bằng SHA-256
@@ -16,8 +17,7 @@ class Customer(models.Model):
         # Kiểm tra nếu không có identity_card_number thì mới lưu
         if not self.identity_card_number or self.identity_card_number == 'UNKNOWN':
             raise ValueError("Bạn phải cung cấp số CCCD thông qua phương thức set_identity_card_number() trước khi lưu.")
-        super(Customer, self).save(*args, **kwargs)
+        super(Employee, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"Customer: {CustomUser.username}"
-
+        return f"Employee: {CustomUser.username}"

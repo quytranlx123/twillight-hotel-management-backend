@@ -3,6 +3,7 @@
 from django.db import models
 from customers.models import Customer
 
+
 class CustomerInteraction(models.Model):
     INTERACTION_TYPE_CHOICES = [
         ('email', 'Email'),

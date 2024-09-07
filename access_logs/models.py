@@ -1,12 +1,10 @@
 # access_logs/models.py
-
 from django.db import models
-from django.contrib.auth.models import User
-from django.conf import settings
+from accounts.models import CustomUser
 
 
 class AccessLog(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     access_time = models.DateTimeField(auto_now_add=True)
     action = models.TextField()
 

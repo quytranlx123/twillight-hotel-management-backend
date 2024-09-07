@@ -1,3 +1,5 @@
 from django.contrib import admin
+from.models import Discount,RoomDiscount
 
-# Register your models here.
+admin.site.register(RoomDiscount)
+admin.site.register(Discount)

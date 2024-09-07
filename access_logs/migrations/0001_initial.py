@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="Language",
+            name="AccessLog",
             fields=[
                 (
                     "id",
@@ -21,8 +21,8 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("code", models.CharField(max_length=10)),
-                ("name", models.CharField(max_length=50)),
+                ("access_time", models.DateTimeField(auto_now_add=True)),
+                ("action", models.TextField()),
             ],
         ),
     ]

@@ -8,6 +8,5 @@ class CustomUser(AbstractUser):
     is_employee = models.BooleanField(default=False)
     account_updated = models.DateTimeField(auto_now=True)
 
-
     def __str__(self):
         return f"Account: {self.username}"

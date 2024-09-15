@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Get the checkboxes and the inline forms
     const isCustomerCheckbox = document.getElementById("id_is_customer");
     const isEmployeeCheckbox = document.getElementById("id_is_employee");
     const employeeInline = document.getElementById("employee_profile-group");

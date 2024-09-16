@@ -1,4 +1,4 @@
-# # admin.py trong app accounts
+# # admin.py trong app users
 from django.contrib import admin
 from employees.admin import EmployeeAdmin
 from .models import CustomUser

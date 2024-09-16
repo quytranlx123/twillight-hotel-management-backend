@@ -1,6 +1,6 @@
 import hashlib
 from django.db import models
-from accounts.models import CustomUser
+from users.models import CustomUser
 
 
 class Employee(models.Model):

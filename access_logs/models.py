@@ -1,6 +1,6 @@
 # access_logs/models.py
 from django.db import models
-from accounts.models import CustomUser
+from users.models import CustomUser
 
 
 class AccessLog(models.Model):

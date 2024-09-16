@@ -1,14 +1,50 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*.egg-info/
+*$py.class
+
+# Cài đặt môi trường ảo
 venv/
+env/
+.venv/
+ENV/
 
-# macOS
-.DS_Store
+# Tài liệu tạm thời của IDE
+.idea/
+.vscode/
 
-# Logs
+# Thư mục chứa dữ liệu tạm thời
 *.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.sqlite
 
-# Environments
-.env
+# Thư mục chứa các tập tin tạm thời
+media/
+staticfiles/
+
+# Tệp cấu hình cá nhân
+*.env
+
+# Các tệp cấu hình khác
+*.local
+*.cfg
+*.ini
+*.csv
+*.dat
+*.bak
+
+# Tệp cấu hình Docker (nếu có)
+docker-compose.override.yml
+*.dockerignore
+
+# Thư mục kiểm thử
+.coverage
+nosetests.xml
+coverage.xml
+*.cover
+*.hypothesis/

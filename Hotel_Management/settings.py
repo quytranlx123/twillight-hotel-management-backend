@@ -39,7 +39,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    # 'admin_soft.apps.AdminSoftDashboardConfig',
+    'drf_yasg',
+    'admin_material.apps.AdminMaterialDashboardConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -170,7 +171,10 @@ REST_FRAMEWORK = {
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     )
 }
-# LOGIN_REDIRECT_URL = '/'
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+LOGIN_REDIRECT_URL = '/'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Thư mục chứa các tệp tĩnh được thu thập
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 

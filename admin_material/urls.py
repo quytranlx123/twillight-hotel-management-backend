@@ -1,9 +1,10 @@
-from django.urls import path
+from django.urls import path, include
 from admin_material import views
 from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
+    path('captcha/', include('captcha.urls')),
     path('', views.index, name='index'),
     path('billing/', views.billing, name='billing'),
     path('tables/', views.tables, name='tables'),

@@ -39,6 +39,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'captcha',
     'drf_yasg',
     'admin_material.apps.AdminMaterialDashboardConfig',
     'django.contrib.admin',
@@ -82,7 +83,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     #
-    # 'oauth2_provider.middleware.OAuth2TokenMiddleware',
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -94,7 +95,7 @@ ROOT_URLCONF = "Hotel_Management.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates']
+        "DIRS": [BASE_DIR / 'admin_material/templates']
         ,
         "APP_DIRS": True,
         "OPTIONS": {
@@ -176,5 +177,3 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Thư mục chứa các tệp tĩnh được thu thập
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-

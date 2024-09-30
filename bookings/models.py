@@ -5,6 +5,8 @@ from customers.models import Customer
 from rooms.models import Room
 from discounts.models import Discount
 
+
+# Bảng đặt phòng
 class Booking(models.Model):
     STATUS_CHOICES = [
         ('đã đặt', 'Đã đặt'),
@@ -14,7 +16,7 @@ class Booking(models.Model):
     ]
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    # room = models.ForeignKey(Room, on_delete=models.CASCADE)
     check_in_date = models.DateField()
     check_out_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)

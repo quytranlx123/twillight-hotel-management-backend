@@ -3,12 +3,12 @@
 from django.db import models
 from bookings.models import Booking
 
+# Bảng hoá đơn
 class Invoice(models.Model):
     PAYMENT_STATUS_CHOICES = [
         ('đã thanh toán', 'Đã thanh toán'),
         ('chưa thanh toán', 'Chưa thanh toán'),
     ]
-
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     issued_date = models.DateField()
@@ -17,11 +17,11 @@ class Invoice(models.Model):
     def __str__(self):
         return f"Invoice {self.id} for Booking {self.booking.id}"
 
+# Bảng phương thức thanh toán
 class Payment(models.Model):
     PAYMENT_METHOD_CHOICES = [
         ('PayPal', 'PayPal'),
         ('Credit Card', 'Credit Card'),
-        # Thêm các phương thức thanh toán khác nếu cần
     ]
 
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)

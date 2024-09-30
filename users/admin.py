@@ -1,10 +1,11 @@
 # # admin.py trong app users
 from django.contrib import admin
-from employees.admin import EmployeeAdmin
+from simple_history.admin import SimpleHistoryAdmin
+
 from .models import CustomUser
 from customers.models import Customer
 from employees.models import Employee
-from django.contrib.auth.models import Permission, Group
+from django.contrib.auth.models import Permission
 
 
 class CustomerInline(admin.StackedInline):
@@ -19,10 +20,12 @@ class EmployeeInline(admin.StackedInline):
     extra = 1
 
 
-class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'is_customer', 'is_employee']
+class CustomUserAdmin(SimpleHistoryAdmin):
+    is_superuser = 'is_superuser'
+    list_display = ['username', 'is_superuser', 'is_customer', 'is_employee', 'last_login', 'date_joined',]
     search_fields = ['username', 'email']
     inlines = (CustomerInline, EmployeeInline)
+    ordering = ['-last_login',]
 
     class Media:
         js = ('custom_user_admin.js',)

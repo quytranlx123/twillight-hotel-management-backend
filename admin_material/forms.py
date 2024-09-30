@@ -15,6 +15,7 @@ class RegistrationForm(UserCreationForm):
         label=_("Password Confirmation"),
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password Confirmation'}),
     )
+    # captcha = CaptchaField()
 
     class Meta:
         model = CustomUser
@@ -39,12 +40,14 @@ class LoginForm(AuthenticationForm):
         strip=False,
         widget=forms.PasswordInput(attrs={"class": "form-control", "placeholder": "Password"}),
     )
-    captcha = CaptchaField()
+    # captcha = CaptchaField()
+
 
 class UserPasswordResetForm(PasswordResetForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={
         'class': 'form-control', 'placeholder': 'Email'
     }))
+    captcha = CaptchaField()
 
 
 class UserSetPasswordForm(SetPasswordForm):
@@ -54,6 +57,7 @@ class UserSetPasswordForm(SetPasswordForm):
     new_password2 = forms.CharField(max_length=50, widget=forms.PasswordInput(attrs={
         'class': 'form-control', 'placeholder': 'Confirm New Password'
     }), label="Confirm New Password")
+    captcha = CaptchaField()
 
 
 class UserPasswordChangeForm(PasswordChangeForm):
@@ -66,3 +70,4 @@ class UserPasswordChangeForm(PasswordChangeForm):
     new_password2 = forms.CharField(max_length=50, widget=forms.PasswordInput(attrs={
         'class': 'form-control', 'placeholder': 'Confirm New Password'
     }), label="Confirm New Password")
+    captcha = CaptchaField()

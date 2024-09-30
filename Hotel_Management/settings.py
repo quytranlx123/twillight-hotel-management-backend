@@ -39,6 +39,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'simple_history',
     'captcha',
     'drf_yasg',
     'admin_material.apps.AdminMaterialDashboardConfig',
@@ -64,8 +65,8 @@ INSTALLED_APPS = [
     'otp',
     'roles',
     'external_integrations',
-    'access_logs',
     'customer_support',
+    'activity_logs',
     'languages',
     'employees',
     'crm',
@@ -74,6 +75,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -84,6 +86,8 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     #
     'oauth2_provider.middleware.OAuth2TokenMiddleware',
+    #
+    'activity_logs.middleware.UserAgentMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -177,3 +181,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Thư mục chứa các tệp tĩnh được thu thập
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+TIME_ZONE = 'Asia/Ho_Chi_Minh'
+
+USE_TZ = True

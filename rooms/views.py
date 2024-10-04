@@ -1,37 +1,67 @@
-# from django.shortcuts import render
-# from django.http import HttpResponse
-# from rest_framework import viewsets, permissions, status
-# from rest_framework.decorators import action
-# from rest_framework.response import Response
-#
-# from .models import Room
-# # from .serializers import RoomSerializer, RoomTypeSerializer
-#
-#
-# class RoomViewSet(viewsets.ModelViewSet):
-#     queryset = Room.objects.all()
-#     serializer_class = RoomSerializer
-#
-#     def get_permissions(self):
-#         if self.action == 'list':
-#             return [permissions.AllowAny()]
-#         return [permissions.IsAuthenticated()]
-#
-#     @action(methods=['post'], detail=True, url_path='hide-rooms', url_name='hide-rooms')
-#     def hidden_room(self, request, pk):
-#         try:
-#             r = Room.objects.get(pk=pk)
-#             r.active = False
-#             r.save()
-#         except Room.DoesNotExist:
-#             return Response(status=status.HTTP_404_NOT_FOUND)
-#
-#         return Response(data=RoomSerializer(r).data, status=status.HTTP_200_OK)
-#
-#
-# class RoomTypeViewSet(viewsets.ModelViewSet):
-#     queryset = RoomType.objects.all()
-#     serializer_class = RoomTypeSerializer
-#
-# def index(request):
-#     return HttpResponse("Hello, world. You're at the room index.")
+# views.py
+import jwt
+from django.conf import settings
+from rest_framework import generics
+from rest_framework.exceptions import AuthenticationFailed
+from .models import Room
+from .serializers import RoomSerializer
+
+
+class RoomAuthenticationMixin:
+    def authenticate(self, request):
+        token = request.COOKIES.get('jwt')
+        if not token:
+            raise AuthenticationFailed('Unauthenticated')
+
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            role = payload.get('role')
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Token expired')
+        except jwt.DecodeError:
+            raise AuthenticationFailed('Invalid token')
+
+        return role
+
+
+class RoomListView(generics.ListAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+
+
+class RoomDetailView(generics.RetrieveAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+
+
+class RoomCreateView(generics.CreateAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+
+    def perform_create(self, serializer):
+        role = self.authenticate(self.request)
+        if role not in ['admin', 'manager']:
+            raise AuthenticationFailed('Permission denied')
+        serializer.save()
+
+
+class RoomUpdateView(generics.UpdateAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+
+    def perform_update(self, serializer):
+        role = self.authenticate(self.request)
+        if role not in ['admin', 'manager']:
+            raise AuthenticationFailed('Permission denied')
+        serializer.save()
+
+
+class RoomDeleteView(generics.DestroyAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+
+    def perform_destroy(self, instance):
+        role = self.authenticate(self.request)
+        if role not in ['admin', 'manager']:
+            raise AuthenticationFailed('Permission denied')
+        instance.delete()

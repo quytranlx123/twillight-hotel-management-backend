@@ -22,7 +22,7 @@ class EmployeeInline(admin.StackedInline):
 
 class CustomUserAdmin(SimpleHistoryAdmin):
     is_superuser = 'is_superuser'
-    list_display = ['username', 'is_superuser', 'is_customer', 'is_employee', 'last_login', 'date_joined',]
+    list_display = ['username', 'is_superuser', 'last_login', 'date_joined','role']
     search_fields = ['username', 'email']
     inlines = (CustomerInline, EmployeeInline)
     ordering = ['-last_login',]

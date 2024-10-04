@@ -10,11 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'oauth2_provider.backends.OAuth2Backend',
 ]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -63,15 +63,14 @@ INSTALLED_APPS = [
     'translations',
     'discounts',
     'otp',
-    'roles',
     'external_integrations',
     'customer_support',
     'activity_logs',
     'languages',
     'employees',
     'crm',
-    'oauth2_provider',
-    'corsheaders'
+    'corsheaders',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -83,9 +82,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    #
-    'oauth2_provider.middleware.OAuth2TokenMiddleware',
-    #
     'activity_logs.middleware.UserAgentMiddleware'
 ]
 
@@ -172,9 +168,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 2,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+
 LOGIN_REDIRECT_URL = '/'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -184,3 +186,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
 USE_TZ = True
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')

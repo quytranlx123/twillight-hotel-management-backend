@@ -1,18 +1,10 @@
-from rest_framework.serializers import ModelSerializer
-
-from rooms.models import Room
-                          # RoomType)
-
-
-# class RoomTypeSerializer(ModelSerializer):
-#     class Meta:
-#         model = RoomType
-#         fields = ["id", "type_name"]
+# serializers.py
+from rest_framework import serializers
+from .models import Room
 
 
-# class RoomSerializer(ModelSerializer):
-#     room_type = RoomTypeSerializer()
-#
-#     class Meta:
-#         model = Room
-#         fields = ["id","room_number","room_type","status","price_per_night","room_type"]
+class RoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ['id', 'name', 'room_type', 'capacity', 'area', 'status', 'price_per_night', 'description',
+                  'image', 'image_bathroom', 'image_amenities', 'created_at']

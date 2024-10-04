@@ -1,28 +1,13 @@
 from django.db import models
+from django.utils.text import slugify
 
 
-# rooms/models.py
-# class RoomType(models.Model):
-#     type_name = models.CharField(max_length=50)
-#     description = models.TextField(null=True, blank=True)
-#
-#     def __str__(self):
-#         return self.type_name
-
-# Bảng phòng
-class Room(models.Model):
+class RoomType(models.Model):
     STATUS_CHOICES = [
         ('trống', 'Trống'),
         ('đã đặt', 'Đã đặt'),
         ('đang bảo trì', 'Đang bảo trì'),
     ]
-    # Ocean View Room: 2, 25-35m2
-    # Deluxe: 2-4, 30-50m2
-    # Suite: 2-4, 50-80m2
-    # Family: 4-6, 40-70m2
-    # Resort: 2-4, 30-60m2
-    # First Floor: 2-4, 25-45m2
-    # Bungalow: 2-4, 50-100m2
     ROOMTYPE_CHOICES = [
         ('family', 'Family'),
         ('ground_floor', 'Ground Floor'),
@@ -37,15 +22,29 @@ class Room(models.Model):
         ('2-4', '2-4 người'),
         ('4-6', '4-6 người'),
     ]
-    name = models.CharField(max_length=10, unique=True)
     room_type = models.CharField(max_length=20, choices=ROOMTYPE_CHOICES)
     capacity = models.CharField(max_length=20, choices=CAPACITY_CHOICES)
     area = models.FloatField()  # Diện tích (m²)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Trống')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='trống')
     price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(null=True, blank=True)
-    image = models.ImageField(upload_to='room_images/', null=True, blank=True)
+
+    def upload_image_to(self, filename):
+        # Sử dụng slugify để tạo một tên hợp lệ từ name
+        return f'room_images/{slugify(self.name)}/{filename}'
+
+    image = models.ImageField(upload_to=upload_image_to, null=True, blank=True)
+    image_bathroom = models.ImageField(upload_to=upload_image_to, null=True, blank=True)
+    image_amenities = models.ImageField(upload_to=upload_image_to, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __str__(self):
+        return self.name
+
+
+class Room(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name

@@ -34,7 +34,10 @@ SECRET_KEY = "django-insecure-ynw8f1=cp%y!w*^b_*3wpm4&7rqb=l!#g$8$!h8&2q#e8a_x(d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+]
 
 # Application definition
 
@@ -42,7 +45,6 @@ INSTALLED_APPS = [
     'simple_history',
     'captcha',
     'drf_yasg',
-    'admin_material.apps.AdminMaterialDashboardConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -82,7 +84,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    'activity_logs.middleware.UserAgentMiddleware'
+    'activity_logs.middleware.UserAgentMiddleware',
+    'users.middleware.JWTAuthenticationMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -94,8 +97,6 @@ ROOT_URLCONF = "Hotel_Management.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'admin_material/templates']
-        ,
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -145,13 +146,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
-USE_I18N = True
+TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
 USE_TZ = True
+
+LANGUAGE_CODE = "en-us"
+
+USE_I18N = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -166,7 +167,6 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 2,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
@@ -183,12 +183,20 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Thư mục chứa các tệp tĩnh được thu thập
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-TIME_ZONE = 'Asia/Ho_Chi_Minh'
-
-USE_TZ = True
-
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 MEDIA_URL = '/media/'
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+# Paypal
+PAYPAL_CLIENT_ID = 'AZ9Oe-xMLqgBcYyZI3B9IqULifMo2v43OIIqc8KIy811QqCU8upTB4wz_ORxrd0B3ssNeblBCyCQzqkJ'
+PAYPAL_CLIENT_SECRET = 'EOpfFlz2UX4YHapC5LOu0EkIlKntR-fpwsjk3oqA2sK5vTjygDMt0kqEEk_ro32IJW6e6c56yyVSSHHM'
+PAYPAL_MODE = 'sandbox'
+
+# settings.py
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+]
+

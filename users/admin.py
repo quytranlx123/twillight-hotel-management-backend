@@ -1,35 +1,27 @@
-# # admin.py trong app users
 from django.contrib import admin
-from simple_history.admin import SimpleHistoryAdmin
-
 from .models import CustomUser
-from customers.models import Customer
-from employees.models import Employee
-from django.contrib.auth.models import Permission
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
+@admin.register(CustomUser)
+class CustomUserAdmin(BaseUserAdmin):
+    list_display = ('id','username', 'email', 'first_name', 'last_name', 'account_updated','role')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    ordering = ('email',)
 
-class CustomerInline(admin.StackedInline):
-    model = Customer
-    max_num = 10
-    extra = 1
+    # Cấu hình các trường trong giao diện chỉnh sửa
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'user_permissions')}),
+        ('Important dates', {'fields': ('date_joined', 'account_updated')}),  # Bao gồm account_updated
+    )
 
+    # Đánh dấu các trường không thể chỉnh sửa
+    readonly_fields = ('date_joined', 'account_updated')
 
-class EmployeeInline(admin.StackedInline):
-    model = Employee
-    max_num = 10
-    extra = 1
-
-
-class CustomUserAdmin(SimpleHistoryAdmin):
-    is_superuser = 'is_superuser'
-    list_display = ['username', 'is_superuser', 'last_login', 'date_joined','role']
-    search_fields = ['username', 'email']
-    inlines = (CustomerInline, EmployeeInline)
-    ordering = ['-last_login',]
-
-    class Media:
-        js = ('custom_user_admin.js',)
-
-
-admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(Permission)
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'password1', 'password2', 'is_staff', 'is_active')}
+         ),
+    )

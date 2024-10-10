@@ -1,26 +1,58 @@
-# bookings/models.py
-
 from django.db import models
 from customers.models import Customer
 from rooms.models import Room
-from discounts.models import Discount
 
 
 # Bảng đặt phòng
 class Booking(models.Model):
-    STATUS_CHOICES = [
-        ('đã đặt', 'Đã đặt'),
-        ('đang ở', 'Đang ở'),
-        ('đã hoàn thành', 'Đã hoàn thành'),
-        ('đã hủy', 'Đã hủy'),
-    ]
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Chờ xác nhận'
+        CONFIRMED = 'confirmed', 'Đã xác nhận'
+        CHECKED_IN = 'checked_in', 'Đang ở'
+        CHECKED_OUT = 'checked_out', 'Đã trả phòng'
+        CANCELLED = 'cancelled', 'Đã hủy'
+        NO_SHOW = 'no_show', 'Không đến'
+        AWAITING_PAYMENT = 'awaiting_payment', 'Đang chờ thanh toán'
+        SUCCESSFUL = 'successful', 'Đã thanh toán'
+        REFUNDED = 'refunded', 'Đã hoàn tiền'
+        AMENDED = 'amended', 'Đã sửa đổi'
+        FAILED = 'failed', 'Thất bại'
 
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    # room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    check_in_date = models.DateField()
-    check_out_date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-    discount = models.ForeignKey(Discount, on_delete=models.SET_NULL, null=True, blank=True)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+
+    # Cho phép customer là tùy chọn để đặt phòng cho khách vãng lai
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True, blank=True)
+    guest_firstname = models.CharField(max_length=255, blank=True, null=True)  # Tên khách vãng lai
+    guest_lastname = models.CharField(max_length=255, blank=True, null=True)  # Tên khách vãng lai
+    guest_email = models.EmailField(blank=True, null=True)  # Email khách vãng lai
+    guest_phone = models.CharField(max_length=15, blank=True, null=True)  # Số điện thoại khách vãng lai
+    check_in_date = models.DateTimeField()
+    check_out_date = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    notes = models.TextField(blank=True, null=True)
+    stay_price = models.FloatField(blank=True, null=True, default=0)
+    surcharge_price = models.FloatField(blank=True, null=True, default=0)
+    services_price = models.FloatField(blank=True, null=True, default=0)
+    promotion_price = models.FloatField(blank=True, null=True, default=0)
+    total_price = models.FloatField(blank=True, null=True, default=0)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.AWAITING_PAYMENT
+    )
+
+    payment_info = models.TextField(blank=True, null=True)  # Thông tin thanh toán
+    cancellation_reason = models.TextField(blank=True, null=True)  # Lý do hủy
+    additional_charges = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Chi phí bổ sung
+    refund_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Số tiền hoàn lại
 
     def __str__(self):
-        return f"Booking {self.id} for {self.customer}"
+        if self.customer:
+            return f"Booking {self.id} for {self.customer}"
+        return f"Guest Booking {self.id} for {self.guest_name}"
+
+    def save(self, *args, **kwargs):
+        if self.check_out_date <= self.check_in_date:
+            raise ValueError("Ngày trả phòng phải sau ngày nhận phòng.")
+        super().save(*args, **kwargs)

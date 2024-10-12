@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from simple_history.models import HistoricalRecords
@@ -37,6 +38,7 @@ class CustomUser(AbstractUser):
         ('employee', 'Employee'),
     ]
     email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=11, unique=True, null=True, blank=True)
     last_login = models.DateTimeField(auto_now_add=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     account_updated = models.DateTimeField(auto_now_add=True)
@@ -47,3 +49,13 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class OTP(models.Model):
+    phone_number = models.CharField(max_length=15)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        # Kiểm tra xem OTP có còn hợp lệ không (ví dụ: trong 5 phút)
+        return (timezone.now() - self.created_at).total_seconds() < 300  # 5 phút

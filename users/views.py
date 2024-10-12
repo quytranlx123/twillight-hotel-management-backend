@@ -1,25 +1,29 @@
 # users/views.py
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 import jwt, datetime
 from Hotel_Management import settings
 from rest_framework import viewsets
-from .models import CustomUser
-from .serializers import CustomUserSerializer
-from rest_framework import status
 from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from django.contrib.auth.models import Permission
 from rest_framework import generics
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from twilio.rest import Client
+import random
+import string
+from .models import CustomUser, OTP
+from .serializers import CustomUserSerializer
+from django.conf import settings
 
 
 class UsersViewSet(generics.ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    authentication_classes = (TokenAuthentication, SessionAuthentication)
-    permission_classes = (IsAuthenticated,)
 
 
 class RoomAuthenticationMixin:
@@ -40,12 +44,72 @@ class RoomAuthenticationMixin:
 
 
 class Register(APIView):
+    def generate_otp(self, length=6):
+        return ''.join(random.choices(string.digits, k=length))
+
+    def send_sms(self, to_phone_number, message):
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        client.messages.create(
+            to=to_phone_number,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            body=message
+        )
+
+    @csrf_exempt
     def post(self, request):
-        serializer = CustomUserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        response = Response(serializer.data, status=status.HTTP_201_CREATED)
-        return response
+        phone_number = request.data.get('phone_number')
+
+        # Kiểm tra xem số điện thoại đã tồn tại chưa
+        if CustomUser.objects.filter(phone_number=phone_number).exists():
+            return Response({'error': 'Phone number already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Tạo OTP và lưu vào cơ sở dữ liệu
+        otp = self.generate_otp()
+        OTP.objects.create(phone_number=phone_number, otp=otp)
+
+        message = f'Your OTP code is: {otp}'
+        # Gửi OTP qua SMS
+        self.send_sms(phone_number, message)
+
+        return Response({'message': 'OTP has been sent to your phone.'}, status=status.HTTP_200_OK)
+
+
+class VerifyOTP(APIView):
+    def post(self, request):
+        otp = request.data.get('otp')
+        phone_number = request.data.get('phone_number')
+
+        try:
+            otp_record = OTP.objects.get(phone_number=phone_number, otp=otp)
+            if (timezone.now() - otp_record.created_at).total_seconds() > 300:  # Giả sử OTP hợp lệ trong 5 phút
+                return Response({'error': 'OTP has expired.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Nếu OTP hợp lệ, lưu người dùng
+            user_data = {
+                'username': request.data.get('username'),
+                'phone_number': phone_number,
+                'password': request.data.get('password'),
+                'email': request.data.get('email'),
+                'role': request.data.get('role')
+            }
+            serializer = CustomUserSerializer(data=user_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            # Xóa bản ghi OTP sau khi xác thực thành công (tuỳ chọn)
+            otp_record.delete()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except OTP.DoesNotExist:
+            return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# xem session
+class CheckSession(APIView):
+    def get(self, request):
+        otp = request.session.get('otp')
+        phone_number = request.session.get('phone_number')
+        return Response({'otp': otp, 'phone_number': phone_number}, status=status.HTTP_200_OK)
 
 
 class Login(APIView):
@@ -112,7 +176,7 @@ class CustomUserViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
 
-class PermissionViewSet(RoomAuthenticationMixin,viewsets.ViewSet):
+class PermissionViewSet(RoomAuthenticationMixin, viewsets.ViewSet):
     def assign_permission(self, request, user_id, permission_codename):
         # Kiểm tra người dùng
         user = get_object_or_404(CustomUser, id=user_id)

@@ -9,7 +9,7 @@ class Customer(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     avatar = models.ImageField(upload_to='uploads/%Y/%m/%d', blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
     address = models.TextField(blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
     identity_card_number = models.CharField(max_length=64, unique=True, editable=True)

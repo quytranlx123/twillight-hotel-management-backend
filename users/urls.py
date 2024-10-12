@@ -1,8 +1,11 @@
 from django.urls import path
-from .views import Login, Register, UserView, Logout, PermissionViewSet, UserAppsPermissionsView, UsersViewSet
+from .views import Login, Register, UserView, Logout, PermissionViewSet, UserAppsPermissionsView, UsersViewSet, \
+    VerifyOTP, CheckSession
 
 urlpatterns = [
+    path('session/', CheckSession.as_view(), name='session'),
     path('api/users/register/', Register.as_view(), name='register'),
+    path('api/users/verify-otp/', VerifyOTP.as_view(), name='verify_otp'),
     path('api/users/login/', Login.as_view(), name='login'),
     path('api/users/user/', UserView.as_view(),name='userview'),
     path('api/users/logout/', Logout.as_view(), name='logout'),

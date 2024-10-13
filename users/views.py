@@ -4,6 +4,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 import jwt, datetime
+from rest_framework.generics import CreateAPIView
+
 from Hotel_Management import settings
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
@@ -19,6 +21,16 @@ import string
 from .models import CustomUser, OTP
 from .serializers import CustomUserSerializer
 from django.conf import settings
+
+
+class CustomUserListCreateView(generics.ListCreateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+
+class CustomUserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
 
 
 class UsersViewSet(generics.ListAPIView):
@@ -102,6 +114,65 @@ class VerifyOTP(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except OTP.DoesNotExist:
             return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ForgotPassword(APIView):
+    def generate_otp(self, length=6):
+        return ''.join(random.choices(string.digits, k=length))
+
+    def send_sms(self, to_phone_number, message):
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        client.messages.create(
+            to=to_phone_number,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            body=message
+        )
+
+    @csrf_exempt
+    def post(self, request):
+        phone_number = request.data.get('phone_number')
+
+        # Kiểm tra xem số điện thoại có tồn tại không
+        if not CustomUser.objects.filter(phone_number=phone_number).exists():
+            return Response({'error': 'Phone number does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Tạo OTP và lưu vào cơ sở dữ liệu
+        otp = self.generate_otp()
+        OTP.objects.create(phone_number=phone_number, otp=otp)
+
+        message = f'Your OTP code is: {otp}'
+        # Gửi OTP qua SMS
+        self.send_sms(phone_number, message)
+
+        return Response({'message': 'OTP has been sent to your phone.'}, status=status.HTTP_200_OK)
+
+
+class ResetPassword(APIView):
+    def post(self, request):
+        otp = request.data.get('otp')
+        phone_number = request.data.get('phone_number')
+        new_password = request.data.get('new_password')
+
+        try:
+            # Kiểm tra OTP có tồn tại không
+            otp_record = OTP.objects.get(phone_number=phone_number, otp=otp)
+            if (timezone.now() - otp_record.created_at).total_seconds() > 300:  # OTP hợp lệ trong 5 phút
+                return Response({'error': 'OTP has expired.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Lấy người dùng bằng số điện thoại
+            user = CustomUser.objects.get(phone_number=phone_number)
+            # Đặt lại mật khẩu
+            user.set_password(new_password)
+            user.save()
+
+            # Xóa bản ghi OTP sau khi xác thực thành công (tuỳ chọn)
+            otp_record.delete()
+
+            return Response({'message': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)
+        except OTP.DoesNotExist:
+            return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'User does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # xem session

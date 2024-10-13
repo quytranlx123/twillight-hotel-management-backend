@@ -38,7 +38,7 @@ class CustomUser(AbstractUser):
         ('employee', 'Employee'),
     ]
     email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=11, unique=True, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
     last_login = models.DateTimeField(auto_now_add=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     account_updated = models.DateTimeField(auto_now_add=True)

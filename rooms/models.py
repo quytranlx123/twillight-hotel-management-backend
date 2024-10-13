@@ -22,7 +22,7 @@ class RoomType(models.Model):
     room_type = models.CharField(max_length=20, choices=ROOMTYPE_CHOICES, unique=True)
     capacity = models.CharField(max_length=20, choices=CAPACITY_CHOICES)
     area = models.FloatField()  # Diện tích (m²)
-    price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
+    price_per_night = models.DecimalField(max_digits=15, decimal_places=2)
     description = models.TextField(null=True, blank=True)
 
     def upload_image_to(self, filename):

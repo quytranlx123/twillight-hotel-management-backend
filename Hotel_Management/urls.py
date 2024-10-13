@@ -23,7 +23,7 @@ urlpatterns = [
                   path('', include('rooms.urls')),
                   path('', include('users.urls')),
                   # path('', include('payments.urls')),
-                  path('api/', include('bookings.urls')),
+                  path('', include('bookings.urls')),
 
                   re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0),
                           name='schema-json'),

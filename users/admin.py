@@ -1,27 +1,20 @@
 from django.contrib import admin
 from .models import CustomUser
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .serializers import CustomUserSerializer
+
 
 @admin.register(CustomUser)
-class CustomUserAdmin(BaseUserAdmin):
-    list_display = ('id','username', 'email', 'first_name', 'last_name', 'account_updated','role')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
-    ordering = ('email',)
+class CustomUserAdmin(admin.ModelAdmin):
+    # Lấy các trường từ serializer
+    serializer = CustomUserSerializer()
+    serializer_fields = [field for field in serializer.fields]  # Lấy danh sách tên các trường
 
-    # Cấu hình các trường trong giao diện chỉnh sửa
+    # Sử dụng các trường này cho list_display
+    list_display = serializer_fields  # Sử dụng các trường từ serializer cho list_display
+
+    # Nếu bạn muốn sử dụng cho fieldsets hoặc readonly_fields, bạn có thể làm tương tự:
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'user_permissions')}),
-        ('Important dates', {'fields': ('date_joined', 'account_updated')}),  # Bao gồm account_updated
-    )
-
-    # Đánh dấu các trường không thể chỉnh sửa
-    readonly_fields = ('date_joined', 'account_updated')
-
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'is_staff', 'is_active')}
-         ),
+        ('Thông tin cá nhân', {'fields': ('first_name', 'last_name', 'email', 'role')}),
+        ('Quyền hạn', {'fields': ('is_active',)}),
     )

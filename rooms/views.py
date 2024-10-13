@@ -1,116 +1,117 @@
 import jwt
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotFound
 from .models import RoomType, Room
 from .serializers import RoomSerializer, RoomTypeSerializer
-
-
-class RoomAuthenticationMixin:
-    def authenticate(self, request):
-        token = request.COOKIES.get('jwt')
-        if not token:
-            raise AuthenticationFailed('Unauthenticated')
-
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-            role = payload.get('role')
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Token expired')
-        except jwt.DecodeError:
-            raise AuthenticationFailed('Invalid token')
-
-        return role
+from rest_framework.permissions import AllowAny
 
 
 class RoomTypeListView(generics.ListAPIView):
     queryset = RoomType.objects.all()
     serializer_class = RoomTypeSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
 
 class RoomTypeDetailView(generics.RetrieveAPIView):
     queryset = RoomType.objects.all()
     serializer_class = RoomTypeSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
 
-class RoomTypeCreateView(RoomAuthenticationMixin, generics.CreateAPIView):
+class RoomTypeCreateView(generics.CreateAPIView):
     queryset = RoomType.objects.all()
     serializer_class = RoomTypeSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
+    @csrf_exempt
     def perform_create(self, serializer):
-        role = self.authenticate(self.request)
-        if role not in ['admin', 'manager', 'employee']:
-            raise AuthenticationFailed('Permission denied')
         serializer.save()
 
 
-class RoomTypeUpdateView(RoomAuthenticationMixin, generics.UpdateAPIView):
+class RoomTypeUpdateView(generics.UpdateAPIView):
     queryset = RoomType.objects.all()
     serializer_class = RoomTypeSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
     def perform_update(self, serializer):
-        role = self.authenticate(self.request)
-        if role not in ['admin', 'manager', 'employee']:
-            raise AuthenticationFailed('Permission denied')
         serializer.save()
 
 
-class RoomTypeDeleteView(RoomAuthenticationMixin, generics.DestroyAPIView):
+class RoomTypeDeleteView(generics.DestroyAPIView):
     queryset = RoomType.objects.all()
     serializer_class = RoomTypeSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
     def perform_destroy(self, instance):
-        role = self.authenticate(self.request)
-        if role not in ['admin', 'manager', 'employee']:
-            raise AuthenticationFailed('Permission denied')
         instance.delete()
 
 
 class RoomListView(generics.ListAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
 
 class RoomDetailView(generics.RetrieveAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
 
-class RoomCreateView(RoomAuthenticationMixin, generics.CreateAPIView):
+class RoomCreateView(generics.CreateAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
     def perform_create(self, serializer):
-        role = self.authenticate(self.request)
-        if role not in ['admin', 'manager', 'employee']:
-            raise AuthenticationFailed('Permission denied')
         serializer.save()
 
 
-class RoomUpdateView(RoomAuthenticationMixin, generics.UpdateAPIView):
+class RoomUpdateView(generics.UpdateAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    permission_classes = [AllowAny]
 
     def perform_update(self, serializer):
-        role = self.authenticate(self.request)
-        if role not in ['admin', 'manager', 'employee']:
-            raise AuthenticationFailed('Permission denied')
-        serializer.save()
+        # Lấy dữ liệu từ request
+        data = self.request.data
+
+        # Tạo một từ điển chứa các trường cần cập nhật
+        update_fields = {}
+
+        # Kiểm tra từng trường và chỉ thêm vào nếu không phải null
+        for field in serializer.validated_data.keys():
+            value = data.get(field, None)
+            if value is not None:  # Nếu giá trị không phải là null
+                if field == 'room_type':
+                    # Chuyển đổi ID thành RoomType instance
+                    try:
+                        room_type_instance = RoomType.objects.get(id=value)
+                        update_fields[field] = room_type_instance
+                    except RoomType.DoesNotExist:
+                        raise NotFound(f"RoomType with id {value} does not exist.")
+                else:
+                    update_fields[field] = value
+
+        # Cập nhật chỉ các trường không phải null
+        serializer.save(**update_fields)
+        # Cập nhật chỉ các trường không phải
 
 
-class RoomDeleteView(RoomAuthenticationMixin, generics.DestroyAPIView):
+class RoomDeleteView(generics.DestroyAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
     def perform_destroy(self, instance):
-        role = self.authenticate(self.request)
-        if role not in ['admin', 'manager', 'employee']:
-            raise AuthenticationFailed('Permission denied')
         instance.delete()
 
 
 class RoomListViewWithRoomType(generics.ListAPIView):
     serializer_class = RoomSerializer
+    permission_classes = [AllowAny]  # Cho phép truy cập cho mọi người
 
     def get_queryset(self):
         queryset = Room.objects.all()

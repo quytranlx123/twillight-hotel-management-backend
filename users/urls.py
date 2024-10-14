@@ -1,4 +1,6 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+
 from .views import Login, Register, UserView, Logout, PermissionViewSet, UserAppsPermissionsView, UsersViewSet, \
     VerifyOTP, CheckSession, CustomUserListCreateView, CustomUserRetrieveUpdateDestroyView, ForgotPassword, \
     ResetPassword
@@ -20,6 +22,8 @@ urlpatterns = [
     path('api/users/<int:pk>/', CustomUserRetrieveUpdateDestroyView.as_view(), name='user-detail'),
     path('api/users/forgot-password/', ForgotPassword.as_view(), name='forgot-password'),
     path('api/users/reset-password/', ResetPassword.as_view(), name='reset-password'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
 # GET /users/: Lấy danh sách tất cả người dùng.

@@ -64,7 +64,6 @@ INSTALLED_APPS = [
     'assets',
     'translations',
     'discounts',
-    'otp',
     'external_integrations',
     'customer_support',
     'activity_logs',

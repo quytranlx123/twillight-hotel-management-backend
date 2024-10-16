@@ -7,9 +7,9 @@ from rooms.models import Room
 class Booking(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending', 'Chờ xác nhận'
-        CONFIRMED = 'confirmed', 'Đã xác nhận'
-        CHECKED_IN = 'checked_in', 'Đang ở'
-        CHECKED_OUT = 'checked_out', 'Đã trả phòng'
+        CONFIRMED = 'confirmed', 'Đã xác nhận' #nhân viên chấp nhận và khoá phòng
+        CHECKED_IN = 'checked_in', 'Đang ở' # cập nhật thông tin lưu trú và chuyển đến awaiting payment
+        CHECKED_OUT = 'checked_out', 'Đã trả phòng' #nhận tiền và set thành công chuyển phòng về trạng thái act
         CANCELLED = 'cancelled', 'Đã hủy'
         NO_SHOW = 'no_show', 'Không đến'
         AWAITING_PAYMENT = 'awaiting_payment', 'Đang chờ thanh toán'
@@ -39,7 +39,7 @@ class Booking(models.Model):
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.AWAITING_PAYMENT
+        default=Status.PENDING
     )
 
     payment_info = models.TextField(blank=True, null=True)  # Thông tin thanh toán

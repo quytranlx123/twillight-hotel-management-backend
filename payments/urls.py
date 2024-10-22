@@ -1,8 +1,9 @@
-# from django.urls import path
-# from .views import create_payment, execute_payment, cancel_payment
-#
-# urlpatterns = [
-#     path('api/paypal/create-payment/', create_payment, name='create_payment'),
-#     path('success/', execute_payment, name='execute_payment'),
-#     path('cancel/', cancel_payment, name='cancel_payment'),
-# ]
+from django.urls import path
+from .views import ZaloPayCreateOrderView, ZaloPayCallbackView, ZaloPayQueryTransactionView
+
+urlpatterns = [
+    path('api/payments/zalopay_create_order/', ZaloPayCreateOrderView.as_view(), name='create_order'),
+    path('api/payments/callback/', ZaloPayCallbackView.as_view(), name='zalo_pay_callback'),
+    path('api/payments/query-transaction/<str:app_trans_id>/', ZaloPayQueryTransactionView.as_view(),
+         name='query_transaction'),
+]

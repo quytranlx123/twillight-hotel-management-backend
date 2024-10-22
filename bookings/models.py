@@ -1,5 +1,6 @@
 from django.db import models
 from customers.models import Customer
+from employees.models import Employee
 from rooms.models import Room
 
 
@@ -46,6 +47,7 @@ class Booking(models.Model):
     cancellation_reason = models.TextField(blank=True, null=True)  # Lý do hủy
     additional_charges = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Chi phí bổ sung
     refund_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Số tiền hoàn lại
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         if self.customer:
@@ -55,4 +57,14 @@ class Booking(models.Model):
     def save(self, *args, **kwargs):
         if self.check_out_date <= self.check_in_date:
             raise ValueError("Ngày trả phòng phải sau ngày nhận phòng.")
+
+        # Tính toán tổng giá trị
+        self.total_price = (
+                (self.stay_price or 0) +
+                (self.surcharge_price or 0) +
+                (self.services_price or 0) -
+                (self.promotion_price or 0) +
+                (self.additional_charges or 0)
+        )
+
         super().save(*args, **kwargs)

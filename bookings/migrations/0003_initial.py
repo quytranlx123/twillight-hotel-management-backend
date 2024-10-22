@@ -8,19 +8,27 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("bookings", "0001_initial"),
-        ("customers", "0001_initial"),
+        ("bookings", "0002_initial"),
+        ("employees", "0001_initial"),
+        ("rooms", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
             model_name="booking",
-            name="customer",
+            name="employee",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="customers.customer",
+                to="employees.employee",
+            ),
+        ),
+        migrations.AddField(
+            model_name="booking",
+            name="room",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="rooms.room"
             ),
         ),
     ]

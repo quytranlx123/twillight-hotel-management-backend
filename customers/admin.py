@@ -4,7 +4,7 @@ from .models import Customer
 
 
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ['user', 'phone_number', 'address']
+    list_display = ['id','user', 'phone_number', 'address']
     search_fields = ['user__username', 'phone']
 
     def save_model(self, request, obj, form, change):

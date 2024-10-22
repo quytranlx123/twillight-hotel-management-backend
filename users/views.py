@@ -5,9 +5,10 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.exceptions import AuthenticationFailed
 import jwt, datetime
 from rest_framework.generics import CreateAPIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from Hotel_Management import settings
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import Permission
@@ -18,8 +19,11 @@ from rest_framework.views import APIView
 from twilio.rest import Client
 import random
 import string
+
+from customers.models import Customer
+from customers.serializers import CustomerSerializer
 from .models import CustomUser, OTP
-from .serializers import CustomUserSerializer
+from .serializers import CustomUserSerializer, CustomerRegisterSerializer
 from django.conf import settings
 
 
@@ -93,10 +97,10 @@ class VerifyOTP(APIView):
 
         try:
             otp_record = OTP.objects.get(phone_number=phone_number, otp=otp)
-            if (timezone.now() - otp_record.created_at).total_seconds() > 300:  # Giả sử OTP hợp lệ trong 5 phút
+            if (timezone.now() - otp_record.created_at).total_seconds() > 300:  # OTP hợp lệ trong 5 phút
                 return Response({'error': 'OTP has expired.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Nếu OTP hợp lệ, lưu người dùng
+            # Nếu OTP hợp lệ, tạo user
             user_data = {
                 'username': request.data.get('username'),
                 'phone_number': phone_number,
@@ -104,16 +108,22 @@ class VerifyOTP(APIView):
                 'email': request.data.get('email'),
                 'role': request.data.get('role')
             }
-            serializer = CustomUserSerializer(data=user_data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            user_serializer = CustomerRegisterSerializer(data=user_data)
+            user_serializer.is_valid(raise_exception=True)
+            user = user_serializer.save()  # Tạo user và tự động tạo customer nếu cần
 
-            # Xóa bản ghi OTP sau khi xác thực thành công (tuỳ chọn)
+            # Xóa OTP sau khi xác thực thành công
             otp_record.delete()
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({
+                'user': user_serializer.data,
+                'customer': {'user': user.customer.id}  # Hoặc lấy thông tin customer nếu cần
+            }, status=status.HTTP_201_CREATED)
+
         except OTP.DoesNotExist:
             return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ForgotPassword(APIView):
@@ -183,35 +193,21 @@ class CheckSession(APIView):
         return Response({'otp': otp, 'phone_number': phone_number}, status=status.HTTP_200_OK)
 
 
-class Login(APIView):
-    def post(self, request):
-        username = request.data['username']
-        password = request.data['password']
+class CustomTokenObtainPairView(TokenObtainPairView):
+    permission_classes = (permissions.AllowAny,)
 
-        user = CustomUser.objects.filter(username=username).first()
-        if user is None:
-            raise AuthenticationFailed('User not found')
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        if not user.check_password(password):
-            raise AuthenticationFailed('Incorrect password')
+        # Lấy thông tin token
+        tokens = serializer.validated_data
+        user = CustomUser.objects.get(username=request.data['username'])
 
-        payload = {
-            'id': user.id,
-            'role': user.role,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
-            'iat': datetime.datetime.utcnow(),
-        }
+        # Thêm role vào phản hồi
+        tokens['role'] = user.role
 
-        token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-
-        response = Response()
-        response.set_cookie(key='jwt', value=token, httponly=True)
-        response.data = {
-            'id': user.id,
-            'jwt': token,
-            'role': user.role
-        }
-        return response
+        return Response(tokens, status=status.HTTP_200_OK)
 
 
 class UserView(APIView):

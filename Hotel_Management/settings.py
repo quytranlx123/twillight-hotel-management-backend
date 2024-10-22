@@ -34,15 +34,9 @@ SECRET_KEY = "django-insecure-ynw8f1=cp%y!w*^b_*3wpm4&7rqb=l!#g$8$!h8&2q#e8a_x(d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-]
-
 # Application definition
 
 INSTALLED_APPS = [
-    'simple_history',
     'captcha',
     'drf_yasg',
     'django.contrib.admin',
@@ -84,7 +78,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     'activity_logs.middleware.UserAgentMiddleware',
-    'users.middleware.JWTAuthenticationMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -186,8 +179,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 
 MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Paypal
 PAYPAL_CLIENT_ID = 'AZ9Oe-xMLqgBcYyZI3B9IqULifMo2v43OIIqc8KIy811QqCU8upTB4wz_ORxrd0B3ssNeblBCyCQzqkJ'
@@ -199,6 +192,10 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
 ]
 
-TWILIO_ACCOUNT_SID = 'AC85a6bebef0951846a266b6ff3d53edff'
-TWILIO_AUTH_TOKEN = 'ca23b8909564e8a2b0bdf92ced91a45d'
-TWILIO_PHONE_NUMBER = '+19093036580'
+TWILIO_ACCOUNT_SID = 'AC8546af03d276b5e3e934b277d452c78a'
+TWILIO_AUTH_TOKEN = '456ec635891d2825a69977f9e952b07e'
+TWILIO_PHONE_NUMBER = '+15097693754'
+
+ALLOWED_HOSTS=['*']
+
+CORS_ALLOW_ALL_ORIGINS = True  # Chỉ dùng cho phát triển, không nên sử dụng trên production

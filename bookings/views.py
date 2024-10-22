@@ -1,18 +1,4 @@
-from users.models import OTP
 from rest_framework.views import APIView
-from django.db.models import Sum
-from django.utils import timezone
-from django.db.models import Q
-import random
-import string
-from twilio.rest import Client
-from django.conf import settings
-from datetime import datetime
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from .models import Booking, Room
-from .serializers import BookingSerializer
-
 from datetime import datetime
 import random
 import string
@@ -143,25 +129,35 @@ class VerifyOTP(APIView):
         return response
 
 
+from django.db.models import Sum
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.utils import timezone
+
+
 class DailyRevenueView(APIView):
     def get(self, request):
-        today = timezone.now().date()
-        status = "awaiting_payment"
-        daily_revenue = Booking.objects.filter(
-            Q(check_in_date=today) & Q(status=status)
-        ).aggregate(total_revenue=Sum('total_price'))
-        return Response(daily_revenue)
+        # Lấy ngày hiện tại theo múi giờ địa phương
+        today = timezone.localtime(timezone.now()).date()
 
+        # Lọc theo ngày hiện tại với trạng thái 'successful'
+        daily_revenue = Booking.objects.filter(
+            created_at__date=today,
+            status='successful'
+        ).aggregate(total_revenue=Sum('total_price'))
+
+        return Response(daily_revenue)
 
 class MonthlyRevenueView(APIView):
     def get(self, request):
         today = timezone.now().date()
         # Lọc theo tháng, năm hiện tại và status='successful'
         monthly_revenue = Booking.objects.filter(
-            check_in_date__month=today.month,
-            check_in_date__year=today.year,
-            status='successful'  # Thêm điều kiện lọc
-        ).aggregate(total_revenue=Sum('total_price'))  # Sửa tên trường thành 'total_price'
+            created_at__month=today.month,
+            created_at__year=today.year,
+            status='successful'
+        ).aggregate(total_revenue=Sum('total_price'))
+
         return Response(monthly_revenue)
 
 
@@ -170,25 +166,18 @@ class AnnualRevenueView(APIView):
         today = timezone.now().date()
         # Lọc theo năm hiện tại và status='successful'
         annual_revenue = Booking.objects.filter(
-            check_in_date__year=today.year,
-            status='successful'  # Thêm điều kiện lọc
-        ).aggregate(total_revenue=Sum('total_price'))  # Sửa tên trường thành 'total_price'
+            created_at__year=today.year,
+            status='successful'
+        ).aggregate(total_revenue=Sum('total_price'))
+
         return Response(annual_revenue)
-
-
-# class RevenueSummaryView(APIView):
-#     def get(self, request):
-#         # Lọc tất cả các booking có status='successful'
-#         total_revenue = Booking.objects.filter(
-#             status='successful'  # Thêm điều kiện lọc
-#         ).aggregate(total_revenue=Sum('total_price'))  # Sửa tên trường thành 'total_price'
-#         return Response(total_revenue)
 
 
 class RevenueSummaryView(APIView):
     def get(self, request):
         # Lọc tất cả các booking có status='successful'
         total_revenue = Booking.objects.filter(
-            status='awaiting_payment'  # Thêm điều kiện lọc
-        ).aggregate(total_revenue=Sum('stay_price'))  # Sửa tên trường thành 'total_price'
+            status='successful'
+        ).aggregate(total_revenue=Sum('total_price'))
+
         return Response(total_revenue)

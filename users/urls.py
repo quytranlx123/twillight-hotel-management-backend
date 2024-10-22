@@ -1,15 +1,15 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 
-from .views import Login, Register, UserView, Logout, PermissionViewSet, UserAppsPermissionsView, UsersViewSet, \
+from .views import Register, UserView, Logout, PermissionViewSet, UserAppsPermissionsView, \
     VerifyOTP, CheckSession, CustomUserListCreateView, CustomUserRetrieveUpdateDestroyView, ForgotPassword, \
-    ResetPassword
+    ResetPassword, CustomTokenObtainPairView
 
 urlpatterns = [
     path('session/', CheckSession.as_view(), name='session'),
     path('api/users/register/', Register.as_view(), name='register'),
     path('api/users/verify-otp/', VerifyOTP.as_view(), name='verify_otp'),
-    path('api/users/login/', Login.as_view(), name='login'),
+    path('api/users/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/users/user/', UserView.as_view(),name='userview'),
     path('api/users/logout/', Logout.as_view(), name='logout'),
     path('api/users/<int:user_id>/assign_permission/<str:permission_codename>/',

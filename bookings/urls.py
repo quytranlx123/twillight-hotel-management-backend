@@ -7,7 +7,16 @@ router = DefaultRouter()
 booking_list = BookingViewSet.as_view({
     'post': 'create',
     'get': 'list',
+    'update': 'update',
 })
+
+booking_detail = BookingViewSet.as_view({
+    'get': 'retrieve',  # Lấy chi tiết một booking
+    'put': 'update',    # Cập nhật một booking
+    'patch': 'partial_update',  # Cập nhật một phần
+    'delete': 'destroy',  # Xóa một booking
+})
+
 # Định nghĩa urlpatterns
 urlpatterns = [
     path('api/daily/', DailyRevenueView.as_view(), name='daily-revenue'),  # Endpoint cho doanh thu hàng ngày
@@ -16,6 +25,7 @@ urlpatterns = [
     path('api/summary/', RevenueSummaryView.as_view(), name='revenue-summary'),  # Endpoint cho tóm tắt doanh thu
     path('api/bookings/', booking_list, name='booking-list'),
     path('api/bookings/complete/', BookingViewSet.as_view({'post': 'complete_booking'}), name='booking-complete'),
+    path('api/bookings/<int:pk>/', booking_detail, name='booking-detail'),
 ]
 
 # Endpoints của BookingViewSet:

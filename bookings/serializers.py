@@ -1,14 +1,16 @@
 from rest_framework import serializers
 from rooms.models import Room
-from .models import Booking
+from .models import Booking, Customer
+
 
 class BookingSerializer(serializers.ModelSerializer):
-    room_code = serializers.CharField(write_only=True)  # Chỉ để ghi, không cần trả về
+    room_code = serializers.CharField(write_only=True, required=False)  # Chỉ để ghi, không cần trả về
     check_in_date = serializers.DateTimeField(format='%d-%m-%Y')
     check_out_date = serializers.DateTimeField(format='%d-%m-%Y')
     room_name = serializers.CharField(source='room.name', read_only=True)  # Thêm trường room_name để trả về tên phòng
     room_type = serializers.CharField(source='room.room_type.room_type', read_only=True)
     price_per_night = serializers.CharField(source='room.room_type.price_per_night', read_only=True)
+
     class Meta:
         model = Booking
         fields = '__all__'

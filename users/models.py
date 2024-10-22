@@ -1,8 +1,9 @@
 from django.utils import timezone
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from simple_history.models import HistoricalRecords
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.contrib.auth.models import BaseUserManager
+
+from customers.models import Customer
 
 
 class CustomUserManager(BaseUserManager):
@@ -43,9 +44,19 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     account_updated = models.DateTimeField(auto_now_add=True)
     date_joined = models.DateTimeField(auto_now_add=True)
-    history = HistoricalRecords()
-
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, related_name='customer', null=True, blank=True)
     objects = CustomUserManager()
+
+    groups = models.ManyToManyField(
+        Group,
+        related_name='customuser_set',  # Thay đổi tên này cho phù hợp
+        blank=True,
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='customuser_permissions',  # Thay đổi tên này cho phù hợp
+        blank=True,
+    )
 
     def __str__(self):
         return self.username

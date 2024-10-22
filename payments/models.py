@@ -3,6 +3,7 @@
 from django.db import models
 from bookings.models import Booking
 
+
 # Bảng hoá đơn
 class Invoice(models.Model):
     PAYMENT_STATUS_CHOICES = [
@@ -16,6 +17,7 @@ class Invoice(models.Model):
 
     def __str__(self):
         return f"Invoice {self.id} for Booking {self.booking.id}"
+
 
 # Bảng phương thức thanh toán
 class Payment(models.Model):
@@ -33,3 +35,9 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment {self.id} for Invoice {self.invoice.id}"
 
+
+class PaymentTransaction(models.Model):
+    app_trans_id = models.CharField(max_length=255, unique=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=50, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)

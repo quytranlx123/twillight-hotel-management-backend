@@ -155,7 +155,7 @@ Hiện tại chưa có giấy phép mã nguồn mở. Có thể cân nhắc sử
 
 - **Tên:** Trần Ngọc Quí  
 - **GitHub:** [@quytranlx123](https://github.com/quytranlx123)  
-- **Email:** *[tuỳ chọn nếu bạn muốn để]*
+- **Email:** *ngqui.official@gmail.com*
 
 ---
 

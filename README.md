@@ -40,14 +40,14 @@
 
 ## ⚙️ Công nghệ
 
-| Thành phần     | Công nghệ sử dụng           |
-|----------------|-----------------------------|
-| Backend        | Python, Django               |
-| Frontend       | Django Template / Bootstrap |
-| CSDL           | SQLite (hoặc MySQL)         |
-| API bảo mật    | Django REST Framework + JWT|
-| IDE            | VS Code                     |
-| Công cụ khác   | Postman (test API), Git     |
+| Thành phần     | Công nghệ sử dụng              |
+|----------------|--------------------------------|
+| Backend        | Python, Django                 |
+| Frontend       | Django Template / TailwindCSS  |
+| CSDL           | PostgreSQL                     |
+| API bảo mật    | Django REST Framework + JWT    |
+| IDE            | VS Code(React), PyCharm(Django)|
+| Công cụ khác   | Postman (test API), Git        |
 
 ---
 
